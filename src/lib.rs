@@ -1,9 +1,7 @@
 mod camera;
 mod cell;
+mod editor;
 mod grid;
-
-#[cfg(feature = "dev")]
-mod dev_tools;
 
 use bevy::{app::PluginGroupBuilder, prelude::*};
 
@@ -29,7 +27,6 @@ impl Plugin for AppPlugin {
 
         #[cfg(feature = "dev_native")]
         {
-            use bevy::pbr::wireframe::{WireframeConfig, WireframePlugin};
             use bevy::render::{settings::*, RenderPlugin};
 
             default_plugins = default_plugins.set(RenderPlugin {
@@ -38,13 +35,6 @@ impl Plugin for AppPlugin {
                     ..default()
                 }),
                 ..default()
-            });
-
-            default_plugins = default_plugins.add(WireframePlugin);
-
-            app.insert_resource(WireframeConfig {
-                global: true,
-                default_color: Color::BLACK,
             });
         }
 
@@ -59,12 +49,17 @@ impl Plugin for AppPlugin {
             });
         }
 
-        app.add_plugins((default_plugins, camera::plugin, cell::plugin, grid::plugin));
+        app.add_plugins((
+            default_plugins,
+            camera::plugin,
+            cell::plugin,
+            grid::plugin,
+            editor::plugin,
+        ));
 
-        // Enable dev tools for dev builds.
-        #[cfg(feature = "dev")]
-        {
-            app.add_plugins(dev_tools::plugin);
-        }
+        app.insert_resource(AmbientLight {
+            brightness: f32::MAX,
+            ..default()
+        });
     }
 }

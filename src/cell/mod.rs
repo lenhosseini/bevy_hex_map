@@ -6,11 +6,29 @@ use bevy::{
     ecs::{system::RunSystemOnce, world::Command},
     prelude::*,
 };
+use bevy_inspector_egui::{
+    inspector_options::std_options::NumberDisplay, prelude::*, InspectorOptions,
+};
 
-use crate::grid::Coordinates;
+use crate::grid::{Coordinates, Grid};
 
 pub(super) fn plugin(app: &mut App) {
-    app.register_type::<Cell>();
+    app.register_type::<Cell>()
+        .register_type::<CellConfig>()
+        .init_resource::<CellConfig>();
+}
+
+#[derive(Resource, Reflect, Debug, InspectorOptions)]
+#[reflect(Resource, InspectorOptions)]
+pub struct CellConfig {
+    #[inspector(min = 1.0, max = 10.0, display = NumberDisplay::Slider)]
+    pub size: f32,
+}
+
+impl Default for CellConfig {
+    fn default() -> Self {
+        Self { size: 10. }
+    }
 }
 
 #[derive(Debug, Clone, Copy, Component, Reflect, Default)]
@@ -49,18 +67,23 @@ impl Command for SpawnCell {
 
 fn spawn_cell(
     In(config): In<SpawnCell>,
+    grid: Query<Entity, With<Grid>>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    commands.spawn(CellBundle {
-        name: Name::from("Cell"),
-        cell: Cell::new(config.coordinates),
-        pbr: PbrBundle {
-            mesh: meshes.add(config.hexagon.mesh()).into(),
-            material: materials.add(Color::WHITE).into(),
-            transform: Transform::from_translation(config.translation),
-            ..default()
-        },
-    });
+    let cell = commands
+        .spawn(CellBundle {
+            name: Name::from("Cell"),
+            cell: Cell::new(config.coordinates),
+            pbr: PbrBundle {
+                mesh: meshes.add(config.hexagon.mesh()).into(),
+                material: materials.add(Color::WHITE).into(),
+                transform: Transform::from_translation(config.translation),
+                ..default()
+            },
+        })
+        .id();
+
+    commands.entity(grid.single()).push_children(&[cell]);
 }

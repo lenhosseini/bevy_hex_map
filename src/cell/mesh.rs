@@ -1,14 +1,13 @@
 use bevy::{
     math::Vec3,
     prelude::{Mesh, MeshBuilder, Meshable},
-    reflect::Reflect,
     render::{
         mesh::{Indices, PrimitiveTopology},
         render_asset::RenderAssetUsages,
     },
 };
 
-#[derive(Debug, Clone, Copy, Reflect)]
+#[derive(Debug, Clone, Copy)]
 pub struct Hexagon(f32);
 
 impl Default for Hexagon {

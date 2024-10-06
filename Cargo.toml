@@ -5,7 +5,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+bevy_egui = "0.29"
+egui = "0.28"
 bevy = { version = "0.14", features = ["wayland"] }
+bevy-inspector-egui = "0.26.0"
 bevy_mod_billboard = "0.7.0"
 bevy_panorbit_camera = "0.19.3"
 # Compile low-severity logs out of native builds for performance.
