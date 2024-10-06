@@ -1,5 +1,10 @@
 mod mesh;
 
+use bevy_mod_picking::{
+    events::{Click, Pointer},
+    prelude::{Listener, On},
+    PickableBundle,
+};
 pub use mesh::*;
 
 use bevy::{
@@ -45,11 +50,13 @@ impl Cell {
     }
 }
 
-#[derive(Clone, Bundle, Default)]
+#[derive(Bundle)]
 pub struct CellBundle {
     pub name: Name,
     pub cell: Cell,
     pub pbr: PbrBundle,
+    pub pickable: PickableBundle,
+    pub on_click: On<Pointer<Click>>,
 }
 
 #[derive(Debug)]
@@ -82,8 +89,21 @@ fn spawn_cell(
                 transform: Transform::from_translation(config.translation),
                 ..default()
             },
+            pickable: PickableBundle::default(),
+            on_click: On::<Pointer<Click>>::run(on_cell_click),
         })
         .id();
 
     commands.entity(grid.single()).push_children(&[cell]);
+}
+
+pub fn on_cell_click(
+    event: Listener<Pointer<Click>>,
+    cells: Query<&Handle<StandardMaterial>, With<Cell>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    if let Ok(material) = cells.get(event.target) {
+        let material = materials.get_mut(material).unwrap();
+        material.base_color = bevy::color::palettes::css::PINK.into();
+    }
 }

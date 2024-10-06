@@ -2,6 +2,7 @@ mod camera;
 mod cell;
 mod editor;
 mod grid;
+mod light;
 
 use bevy::{app::PluginGroupBuilder, prelude::*};
 
@@ -24,6 +25,16 @@ impl Plugin for AppPlugin {
             .into(),
             ..default()
         });
+
+        #[cfg(feature = "dev")]
+        {
+            use bevy::log::LogPlugin;
+
+            default_plugins = default_plugins.set(LogPlugin {
+                filter: "bevy_hex_map=info".into(),
+                ..default()
+            })
+        }
 
         #[cfg(feature = "dev_native")]
         {
@@ -58,7 +69,7 @@ impl Plugin for AppPlugin {
         ));
 
         app.insert_resource(AmbientLight {
-            brightness: f32::MAX,
+            brightness: 1000.,
             ..default()
         });
     }
