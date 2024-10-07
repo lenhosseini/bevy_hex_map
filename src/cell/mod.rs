@@ -2,7 +2,7 @@ mod mesh;
 
 use bevy_mod_picking::{
     events::{Click, Pointer},
-    prelude::{Listener, On},
+    prelude::{Listener, On, PointerButton},
     PickableBundle,
 };
 pub use mesh::*;
@@ -15,7 +15,10 @@ use bevy_inspector_egui::{
     inspector_options::std_options::NumberDisplay, prelude::*, InspectorOptions,
 };
 
-use crate::grid::{Coordinates, Grid};
+use crate::{
+    editor::EditorColor,
+    grid::{Coordinates, Grid},
+};
 
 pub(super) fn plugin(app: &mut App) {
     app.register_type::<Cell>()
@@ -100,10 +103,15 @@ fn spawn_cell(
 pub fn on_cell_click(
     event: Listener<Pointer<Click>>,
     cells: Query<&Handle<StandardMaterial>, With<Cell>>,
+    color: Res<EditorColor>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    if event.event.button != PointerButton::Primary {
+        return;
+    }
+
     if let Ok(material) = cells.get(event.target) {
         let material = materials.get_mut(material).unwrap();
-        material.base_color = bevy::color::palettes::css::PINK.into();
+        material.base_color = color.0;
     }
 }

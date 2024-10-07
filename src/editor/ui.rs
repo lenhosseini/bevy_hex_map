@@ -1,14 +1,18 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_inspector_egui::{bevy_inspector::ui_for_resource, DefaultInspectorConfigPlugin};
+use bevy_mod_picking::picking_core::PickingPluginsSettings;
 use bevy_panorbit_camera::PanOrbitCamera;
 
 use crate::camera::MainCamera;
 
-use super::label::ShowLabels;
+use super::{label::ShowLabels, EditorColor};
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins((bevy_egui::EguiPlugin, DefaultInspectorConfigPlugin))
-        .add_systems(Update, (draw_ui, disable_camera_movement).chain());
+        .add_systems(
+            Update,
+            (draw_ui, disable_camera_movement, disable_selection).chain(),
+        );
 }
 
 fn draw_ui(world: &mut World) {
@@ -43,6 +47,13 @@ fn draw_ui(world: &mut World) {
                     ui_for_resource::<ShowWireframes>(world, ui);
                 });
             }
+
+            ui.separator();
+
+            ui.horizontal(|ui| {
+                ui.label("Cell Color");
+                ui_for_resource::<EditorColor>(world, ui);
+            });
         });
 }
 
@@ -58,6 +69,22 @@ fn disable_camera_movement(
         }
         false => {
             cam.enabled = true;
+        }
+    };
+}
+
+fn disable_selection(
+    mut ctx: Query<&mut bevy_egui::EguiContext, With<PrimaryWindow>>,
+    mut selection_settings: ResMut<PickingPluginsSettings>,
+) {
+    let mut ctx = ctx.single_mut();
+
+    match ctx.get_mut().is_pointer_over_area() {
+        true => {
+            selection_settings.is_enabled = false;
+        }
+        false => {
+            selection_settings.is_enabled = true;
         }
     };
 }

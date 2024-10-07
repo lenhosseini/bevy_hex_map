@@ -2,7 +2,6 @@ mod camera;
 mod cell;
 mod editor;
 mod grid;
-mod light;
 
 use bevy::{app::PluginGroupBuilder, prelude::*};
 
@@ -69,7 +68,7 @@ impl Plugin for AppPlugin {
         ));
 
         app.insert_resource(AmbientLight {
-            brightness: 1000.,
+            brightness: 5000.,
             ..default()
         });
     }
